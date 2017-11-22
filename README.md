@@ -1,2 +1,2 @@
 # simplejson
-简单的json解析框架
+Convert Java Objects into their JSON representation. convert a JSON string to an equivalent Java object
