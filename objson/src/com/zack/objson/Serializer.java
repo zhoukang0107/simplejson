@@ -75,9 +75,7 @@ class Serializer implements ISerializer {
                     child instanceof Character){
                 stringBuilder.append(child.toString()).append(",");
                 System.out.println("key:"+key+" value(Number/Boolean):"+child.toString());
-            } else if (child instanceof Number[]||
-                    child instanceof Character[]||
-                    child instanceof CharSequence[]){
+            } else if (child instanceof Object[]){
                 Object[] array = (Object[]) child;
                 stringBuilder.append(arrayConvertJson(array)).append(",");
             } else{
@@ -98,16 +96,25 @@ class Serializer implements ISerializer {
     private String arrayConvertJson(Object[] array) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("[");
-        if (array instanceof String[]){
-
-        } else if (array instanceof Number[]||
-                array instanceof Character[]||
-                array instanceof Character[]||
-                array instanceof Boolean[]){
-
-        } else{
-
+        for (int i=0;i<array.length;i++){
+            if (array[i] instanceof String){
+                String str = (String) array[i];
+                stringBuilder.append("\"").append(str).append("\",");
+            } else if (array[i] instanceof Number||
+                    array[i] instanceof Character||
+                    array[i] instanceof Character||
+                    array[i] instanceof Boolean){
+                stringBuilder.append(array[i].toString()).append(",");
+            } else if (array[i] instanceof Collection){
+                Collection<?> collection = (Collection<?>) array[i];
+                //非基本数据类型
+                stringBuilder.append(collectionConvertJson(collection)).append(",");
+            } else {
+                stringBuilder.append(objectConvertJson(array[i])).append(",");
+            }
         }
+        removeLastDot(stringBuilder);
+        stringBuilder.append("]");
         return stringBuilder.toString();
     }
 
