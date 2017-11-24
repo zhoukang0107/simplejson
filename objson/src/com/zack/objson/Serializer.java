@@ -92,7 +92,7 @@ class Serializer implements ISerializer {
 
     /**
      * 将数组转换成json
-     * @param child   必须是数组   Integer  Double Long Short Character Byte Boolean Float String
+     * @param array   必须是数组   Integer  Double Long Short Character Byte Boolean Float String
      * @return
      */
     private String arrayConvertJson(Object[] array) {
@@ -101,18 +101,13 @@ class Serializer implements ISerializer {
         if (array instanceof String[]){
 
         } else if (array instanceof Number[]||
-                array instanceof Character[]){
+                array instanceof Character[]||
+                array instanceof Character[]||
+                array instanceof Boolean[]){
 
-        } else if ()
-        child instanceof Number[]||
+        } else{
 
-
-
-
-        child instanceof Number[]||
-                child instanceof Character[]||
-                child instanceof CharSequence[]
-        return new char[0];*/
+        }
         return stringBuilder.toString();
     }
 
