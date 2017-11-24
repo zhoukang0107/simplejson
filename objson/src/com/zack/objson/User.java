@@ -1,32 +1,40 @@
 package com.zack.objson;
 
-import com.zack.objson.annotation.Alias;
-import com.zack.objson.annotation.Ignore;
-import com.zack.objson.annotation.SerializeName;
-
+import java.util.ArrayList;
 import java.util.List;
 
 public class User {
-    @Alias("upwd")
-    @SerializeName("uname")
+
     String name;
-    @Alias("upwd")
+
     String pwd;
-    @SerializeName("uage")
+
     int age;
-    @Ignore
+
     boolean ignore;
     String address;
 
-    @SerializeName("friend")
     List<User> users;
-
+    List<String> list;
+    String[] array;
     public User(String name, String pwd, int age, boolean ignore, String address) {
         this.name = name;
         this.pwd = pwd;
         this.age = age;
         this.ignore = ignore;
         this.address = address;
+        list = new ArrayList<>();
+        list.add("aaa");
+        list.add("bbb");
+        list.add("ccc");
+        list.add("ddd");
+        list.add("eee");
+        list.add("fff");
+        list.add("ggg");
+       /* array = new String[3];
+        array[0] = "arr0";
+        array[1] = "arr1";
+        array[2] = "arr2";*/
     }
 
     public User(String name, String pwd, int age, boolean ignore, String address, List<User> users) {

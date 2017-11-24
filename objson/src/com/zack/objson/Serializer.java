@@ -16,48 +16,33 @@ class Serializer implements ISerializer {
         if (o==null){
             throw new NullPointerException("obj is null");
         }
-        return serialize(o);
-    }
-
-    private String serialize(Object node) {
-        StringBuilder stringBuilder = new StringBuilder();
-        if (node instanceof Collection){
-            stringBuilder.append("[");
-            //列表类型数据
-            Collection<?> collection = (Collection<?>) node;
-            Iterator<?> it = collection.iterator();
-            while (it.hasNext()){
-                Object obj = it.next();
-                stringBuilder.append(serialize(obj));
-                stringBuilder.append(",");
-            }
-            stringBuilder.append("]");
-        } /*else if (node instanceof Map){
-            //map类型数据
-
-        } */else {
-            stringBuilder.append("{");
-            stringBuilder.append(convertObjectToJson(node));
-            stringBuilder.append("}");
-        }
-        return stringBuilder.toString();
+        return objectConvertJson(o);
     }
 
     /**
-     * 将对象转换成json
+     * 将对象node转换成json串
      * @param node
      * @return
      */
-    private String convertObjectToJson(Object node) {
+    private String objectConvertJson(Object node) {
+        if (node==null) {
+            return "";
+        }
+        //对象是集合
         StringBuilder stringBuilder =  new StringBuilder();
         if (node instanceof Collection){
-            stringBuilder.append(serialize(node));
+            Collection<?> collection = (Collection<?>) node;
+            /*stringBuilder.append("[");*/
+            stringBuilder.append(collectionConvertJson(collection));
+            /*stringBuilder.append("]");*/
             return stringBuilder.toString();
         }
+        //解析属性
         Field[] fields = node.getClass().getDeclaredFields();
         if (fields==null||fields.length==0){
             return stringBuilder.toString();
         }
+        stringBuilder.append("{");
         for (Field field : fields){
             Object child = null;
             field.setAccessible(true);
@@ -69,6 +54,7 @@ class Serializer implements ISerializer {
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
+                continue;
             }
 
             String key = getFieldName(field);
@@ -76,23 +62,92 @@ class Serializer implements ISerializer {
                 //忽略属性
                 continue;
             }
-
+            stringBuilder.append("\"").append(key).append("\":");
+            //属性是集合
             if (child instanceof Collection){
-                stringBuilder.append(serialize(child)).append(",");
-            } else if (child instanceof CharSequence){
-                stringBuilder.append(key).append(":\"").append(child.toString()).append("\"").append(",");
+                Collection<?> collection = (Collection) child;
+                stringBuilder.append(collectionConvertJson(collection)).append(",");
+            }  else if (child instanceof CharSequence){
+                stringBuilder.append("\"").append(child.toString()).append("\"").append(",");
                 System.out.println("key:"+key+" value(CharSequence):"+child.toString());
             } else if (child instanceof Number||
                     child instanceof Boolean||
                     child instanceof Character){
-                stringBuilder.append(key).append(":").append(child.toString()).append(",");
+                stringBuilder.append(child.toString()).append(",");
                 System.out.println("key:"+key+" value(Number/Boolean):"+child.toString());
+            } else if (child instanceof Number[]||
+                    child instanceof Character[]||
+                    child instanceof CharSequence[]){
+                Object[] array = (Object[]) child;
+                stringBuilder.append(arrayConvertJson(array)).append(",");
             } else{
-                stringBuilder.append(convertObjectToJson(child)).append(",");
+                stringBuilder.append(objectConvertJson(child)).append(",");
             }
         }
+        removeLastDot(stringBuilder);
+        stringBuilder.append("}");
         return stringBuilder.toString();
 
+    }
+
+    /**
+     * 将数组转换成json
+     * @param child   必须是数组   Integer  Double Long Short Character Byte Boolean Float String
+     * @return
+     */
+    private String arrayConvertJson(Object[] array) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("[");
+        if (array instanceof String[]){
+
+        } else if (array instanceof Number[]||
+                array instanceof Character[]){
+
+        } else if ()
+        child instanceof Number[]||
+
+
+
+
+        child instanceof Number[]||
+                child instanceof Character[]||
+                child instanceof CharSequence[]
+        return new char[0];*/
+        return stringBuilder.toString();
+    }
+
+    private String collectionConvertJson(Collection<?> collection) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("[");
+        //列表类型数据
+        Iterator<?> it = collection.iterator();
+        while (it.hasNext()) {
+            Object obj = it.next();
+            //属性是集合
+            if (obj instanceof CharSequence){
+                stringBuilder.append("\"").append(obj.toString()).append("\"").append(",");
+            } else if (obj instanceof Number||
+                    obj instanceof Boolean||
+                    obj instanceof Character){
+                stringBuilder.append(obj.toString()).append(",");
+            } else{
+                stringBuilder.append(objectConvertJson(obj)).append(",");
+            }
+            /*stringBuilder.append(objectConvertJson(obj));
+            stringBuilder.append(",");*/
+        }
+        removeLastDot(stringBuilder);
+        stringBuilder.append("]");
+        return stringBuilder.toString();
+    }
+
+    private void removeLastDot(StringBuilder stringBuilder) {
+        if (stringBuilder==null||stringBuilder.length()<=0) {
+            return;
+        }
+        if (','==stringBuilder.charAt(stringBuilder.length()-1)){
+            stringBuilder.deleteCharAt(stringBuilder.length()-1);
+        }
     }
 
     /**
@@ -105,7 +160,6 @@ class Serializer implements ISerializer {
         if (ignoreAnnotation!=null&&ignoreAnnotation.value()){
             return null;
         }
-
         SerializeName serializeNameAnnotation = field.getAnnotation(SerializeName.class);
         if (serializeNameAnnotation!=null){
             return serializeNameAnnotation.value();
@@ -114,6 +168,7 @@ class Serializer implements ISerializer {
         if (aliasAnnotation!=null){
             return aliasAnnotation.value();
         }
+        StringBuilder stringBuilder = new StringBuilder();
         return field.getName();
     }
 }
